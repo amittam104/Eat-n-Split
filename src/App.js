@@ -3,19 +3,19 @@ import { useState } from "react";
 const initialFriends = [
   {
     id: 118836,
-    name: "Clark",
+    friendName: "Clark",
     image: "https://i.pravatar.cc/48?u=118836",
     balance: -7,
   },
   {
     id: 933372,
-    name: "Sarah",
+    friendName: "Sarah",
     image: "https://i.pravatar.cc/48?u=933372",
     balance: 20,
   },
   {
     id: 499476,
-    name: "Anthony",
+    friendName: "Anthony",
     image: "https://i.pravatar.cc/48?u=499476",
     balance: 0,
   },
@@ -30,17 +30,23 @@ function Button({ children, onClick }) {
 }
 
 export default function App() {
+  const [friends, setFriends] = useState(initialFriends);
   const [showAddFriend, setShowAddFriend] = useState(false);
 
   function handleOnClick() {
     setShowAddFriend((showAddFriend) => !showAddFriend);
   }
 
+  function handleAddFriend(friend) {
+    setFriends((friends) => [...friends, friend]);
+    setShowAddFriend(false);
+  }
+
   return (
     <div className="app">
       <div className="sidebar">
-        <FriendsList />
-        {showAddFriend && <FormAddFriend />}
+        <FriendsList friends={friends} />
+        {showAddFriend && <FormAddFriend onAddFriend={handleAddFriend} />}
         <Button onClick={handleOnClick}>
           {showAddFriend ? "Close" : "Add Friend"}
         </Button>
@@ -50,9 +56,7 @@ export default function App() {
   );
 }
 
-function FriendsList() {
-  const friends = initialFriends;
-
+function FriendsList({ friends }) {
   return (
     <ul>
       {friends.map((friend) => (
@@ -65,36 +69,66 @@ function FriendsList() {
 function Friend({ friend }) {
   return (
     <li>
-      <img src={friend.image} alt={friend.name} />
-      <h3>{friend.name}</h3>
+      <img src={friend.image} alt={friend.friendName} />
+      <h3>{friend.friendName}</h3>
 
       {friend.balance < 0 && (
         <p className="red">
-          You owe {friend.name} {Math.abs(friend.balance)}€
+          You owe {friend.friendName} {Math.abs(friend.balance)}€
         </p>
       )}
 
       {friend.balance > 0 && (
         <p className="green">
-          {friend.name} owes you {friend.balance}€
+          {friend.friendName} owes you {friend.balance}€
         </p>
       )}
 
-      {friend.balance === 0 && <p>You and {friend.name} are even</p>}
+      {friend.balance === 0 && <p>You and {friend.friendName} are even</p>}
 
       <Button>Select</Button>
     </li>
   );
 }
 
-function FormAddFriend() {
+function FormAddFriend({ onAddFriend }) {
+  const [friendName, setFriendName] = useState("");
+  const [image, setImage] = useState("https://i.pravatar.cc/48");
+
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    if (!friendName || !image) return;
+
+    const id = crypto.randomUUID();
+    const newFriend = {
+      friendName,
+      image: `${image}?=${id}`,
+      balance: 0,
+      id,
+    };
+
+    onAddFriend(newFriend);
+
+    setFriendName("");
+    setImage("https://i.pravatar.cc/48");
+  }
+
   return (
-    <form className="form-add-friend">
+    <form className="form-add-friend" onSubmit={handleSubmit}>
       <label>🧑‍🤝‍🧑 Friend Name</label>
-      <input type="text" />
+      <input
+        type="text"
+        value={friendName}
+        onChange={(e) => setFriendName(e.target.value)}
+      />
 
       <label>🏞️ Image Url</label>
-      <input type="text" />
+      <input
+        type="text"
+        value={image}
+        onChange={(e) => setImage(e.target.value)}
+      />
 
       <Button>Add</Button>
     </form>
