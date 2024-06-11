@@ -75,7 +75,11 @@ export default function App() {
         </Button>
       </div>
       {isSelected && (
-        <FormSplitBill isSelected={isSelected} onSplitBill={handleSplitBill} />
+        <FormSplitBill
+          isSelected={isSelected}
+          onSplitBill={handleSplitBill}
+          key={isSelected.id}
+        />
       )}
     </div>
   );
